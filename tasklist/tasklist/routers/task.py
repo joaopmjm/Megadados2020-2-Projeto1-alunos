@@ -30,6 +30,15 @@ async def read_tasks(completed: bool = None, db: DBSession = Depends(get_db)):
 async def create_task(item: Task, db: DBSession = Depends(get_db)):
     return db.create_task(item)
 
+@router.post(
+    '',
+    summary='Creates a new user',
+    description='Creates a new user and returns its UUID.',
+    response_model=uuid.UUID,
+)
+async def create_user(item: Task, db: DBSession = Depends(get_db)):
+    return db.create_user(item)
+
 
 @router.get(
     '/{uuid_}',

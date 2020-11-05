@@ -1,7 +1,12 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
-import os.path
+import os.path as path
 
 from fastapi.testclient import TestClient
+
+import sys
+currentdir = path.dirname(path.realpath(__file__))
+parentdir = path.dirname(currentdir)
+sys.path.append(parentdir)
 
 from utils import utils
 
@@ -14,8 +19,8 @@ app.dependency_overrides[utils.get_config_filename] = \
 
 
 def setup_database():
-    scripts_dir = os.path.join(
-        os.path.dirname(__file__),
+    scripts_dir = path.join(
+        path.dirname(__file__),
         '..',
         'database',
         'migrations',

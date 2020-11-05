@@ -15,6 +15,9 @@ class Task(BaseModel):
         False,
         title='Shows whether the task was completed',
     )
+    owner_uuid: Optional[str] = Field(
+        
+    )
 
     class Config:
         schema_extra = {

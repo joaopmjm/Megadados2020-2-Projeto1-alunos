@@ -17,7 +17,7 @@ class DBSession:
     def __init__(self, connection: conn.MySQLConnection):
         self.connection = connection
 
-    def read_tasks(self, completed: bool = None):
+    def read_tasks(self, completed: bool = None, owner_uuid: str = ""):
         query = 'SELECT BIN_TO_UUID(uuid), description, completed FROM tasks'
         if completed is not None:
             query += ' WHERE completed = '
@@ -25,9 +25,14 @@ class DBSession:
                 query += 'True'
             else:
                 query += 'False'
+        if completed is not None and owner_uuid is not "":
+            query += " AND "
+
+        if owner_uuid is not None:
+            query += " WHERE owner_uuid = UUID_TO_BIN(%s)"
 
         with self.connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, owner_uuid)
             db_results = cursor.fetchall()
 
         return {
@@ -111,6 +116,18 @@ class DBSession:
             found = bool(results[0])
 
         return found
+
+    def create_user(self, item: Task):
+        uuid_ = uuid.uuid4()
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                'INSERT INTO users VALUES (UUID_TO_BIN(%s), %s)',
+                (str(uuid_),  item.name),
+            )
+        self.connection.commit()
+
+        return uuid_
 
 
 @lru_cache
