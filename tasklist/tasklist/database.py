@@ -48,14 +48,14 @@ class DBSession:
 
         with self.connection.cursor() as cursor:
             cursor.execute(
-                'INSERT INTO tasks VALUES (UUID_TO_BIN(%s), %s, %s)',
-                (str(uuid_), item.description, item.completed),
+                'INSERT INTO tasks VALUES (UUID_TO_BIN(%s), %s, %s, %s)',
+                (str(uuid_), item.description, item.completed, item.owner_uuid),
             )
         self.connection.commit()
 
         return uuid_
 
-    def read_task(self, uuid_: uuid.UUID):
+    def read_task(self, uuid_: uuid.UUID, owner_uuid):
         if not self.__task_exists(uuid_):
             raise KeyError()
 
@@ -64,9 +64,9 @@ class DBSession:
                 '''
                 SELECT description, completed
                 FROM tasks
-                WHERE uuid = UUID_TO_BIN(%s)
+                WHERE uuid = UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)
                 ''',
-                (str(uuid_), ),
+                (str(uuid_), owner_uuid),
             )
             result = cursor.fetchone()
 
@@ -80,20 +80,20 @@ class DBSession:
             cursor.execute(
                 '''
                 UPDATE tasks SET description=%s, completed=%s
-                WHERE uuid=UUID_TO_BIN(%s)
+                WHERE uuid=UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)
                 ''',
-                (item.description, item.completed, str(uuid_)),
+                (item.description, item.completed, str(uuid_), item.owner_uuid),
             )
         self.connection.commit()
 
-    def remove_task(self, uuid_):
+    def remove_task(self, uuid_, owner_uuid):
         if not self.__task_exists(uuid_):
             raise KeyError()
 
         with self.connection.cursor() as cursor:
             cursor.execute(
-                'DELETE FROM tasks WHERE uuid=UUID_TO_BIN(%s)',
-                (str(uuid_), ),
+                'DELETE FROM tasks WHERE uuid=UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)',
+                (str(uuid_), owner_uuid),
             )
         self.connection.commit()
 
@@ -117,7 +117,7 @@ class DBSession:
 
         return found
 
-    def create_user(self, item: Task):
+    def create_user(self, item: User):
         uuid_ = uuid.uuid4()
 
         with self.connection.cursor() as cursor:
@@ -128,6 +128,37 @@ class DBSession:
         self.connection.commit()
 
         return uuid_
+
+    def delete_user(self, owner_uuid):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                'DELETE FROM users WHERE owner_uuid=UUID_TO_BIN(%s)',
+                (owner_uuid),
+            )
+        self.connection.commit()
+
+        return 200
+
+    def update_user(self, name: str, owner_uuid):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                'UPDATE users SET name=%s WHERE owner_uuid=UUID_TO_BIN(%s)',
+                (name, owner_uuid),
+            )
+        self.connection.commit()
+
+        return 200
+
+    def read_user(self, owner_uuid):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                'SELECT name FROM users WHERE owner_uuid=UUID_TO_BIN(%s)',
+                (owner_uuid),
+            )
+        self.connection.commit()
+        result = cursor.fetchone()
+
+        return User(name=result[0])
 
 
 @lru_cache

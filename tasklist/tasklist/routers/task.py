@@ -17,8 +17,8 @@ router = APIRouter()
     description='Reads the whole task list.',
     response_model=Dict[uuid.UUID, Task],
 )
-async def read_tasks(completed: bool = None, db: DBSession = Depends(get_db)):
-    return db.read_tasks(completed)
+async def read_tasks(completed: bool = None, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
+    return db.read_tasks(completed, owner_uuid)
 
 
 @router.post(
@@ -27,28 +27,19 @@ async def read_tasks(completed: bool = None, db: DBSession = Depends(get_db)):
     description='Creates a new task and returns its UUID.',
     response_model=uuid.UUID,
 )
-async def create_task(item: Task, db: DBSession = Depends(get_db)):
-    return db.create_task(item)
-
-@router.post(
-    '',
-    summary='Creates a new user',
-    description='Creates a new user and returns its UUID.',
-    response_model=uuid.UUID,
-)
-async def create_user(item: Task, db: DBSession = Depends(get_db)):
-    return db.create_user(item)
+async def create_task(item: Task,owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
+    return db.create_task(item, owner_uuid)
 
 
 @router.get(
-    '/{uuid_}',
+    '/{owner_uuid}/{uuid_}',
     summary='Reads task',
     description='Reads task from UUID.',
     response_model=Task,
 )
-async def read_task(uuid_: uuid.UUID, db: DBSession = Depends(get_db)):
+async def read_task(uuid_: uuid.UUID, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
     try:
-        return db.read_task(uuid_)
+        return db.read_task(uuid_, , owner_uuid)
     except KeyError as exception:
         raise HTTPException(
             status_code=404,
@@ -57,7 +48,7 @@ async def read_task(uuid_: uuid.UUID, db: DBSession = Depends(get_db)):
 
 
 @router.put(
-    '/{uuid_}',
+    '/{owner_uuid}/{uuid_}',
     summary='Replaces a task',
     description='Replaces a task identified by its UUID.',
 )
@@ -119,3 +110,62 @@ async def remove_task(uuid_: uuid.UUID, db: DBSession = Depends(get_db)):
 )
 async def remove_all_tasks(db: DBSession = Depends(get_db)):
     db.remove_all_tasks()
+
+
+@router.post(
+    '',
+    summary='Creates a new user',
+    description='Creates a new user and returns its UUID.',
+    response_model=uuid.UUID,
+)
+async def create_user(item: User, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
+    return db.create_user(item, owner_uuid)
+
+
+@router.delete(
+    '/{owner_uuid}',
+    summary='Deletes user',
+    description='Deletes a user identified by its UUID',
+)
+async def delete_user(owner_uuid: uuid.UUID, db: DBSession = Depends(get_db)):
+    try:
+        db.delete_user(owner_uuid)
+    except KeyError as exception:
+        raise HTTPException(
+            status_code=404,
+            detail='User not found',
+        ) from exception
+
+
+@router.patch(
+    '/{owner_uuid}',
+    summary='Alters user name',
+    description='Alters a user`s name identified by its UUID',
+)
+async def alter_user(
+        owner_uuid: uuid.UUID,
+        name: str,
+        db: DBSession = Depends(get_db),
+):
+    try:
+        db.update_user(name=name, owner_uuid=owner_uuid)
+    except KeyError as exception:
+        raise HTTPException(
+            status_code=404,
+            detail='Task not found',
+        ) from exception
+
+@router.get(
+    '/{owner_uuid}',
+    summary='Reads user name',
+    description='Reads user name from UUID.',
+    response_model=User,
+)
+async def read_user(owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
+    try:
+        return db.read_user(owner_uuid)
+    except KeyError as exception:
+        raise HTTPException(
+            status_code=404,
+            detail='User not found',
+        ) from exception

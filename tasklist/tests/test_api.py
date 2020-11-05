@@ -10,6 +10,8 @@ sys.path.append(parentdir)
 
 from utils import utils
 
+from uuid import uuid4
+
 from tasklist.main import app
 
 client = TestClient(app)
@@ -46,17 +48,23 @@ def test_read_tasks_with_no_task():
 
 def test_create_and_read_some_tasks():
     setup_database()
+    user_uuid = str(uuid4())
+    user_uuid1 = str(uuid4())
+
     tasks = [
         {
             "description": "foo",
-            "completed": False
+            "completed": False,
+            "owner_uuid": user_uuid
         },
         {
             "description": "bar",
             "completed": True
+            "owner_uuid": user_uuid1
         },
         {
             "description": "baz"
+            "owner_uuid": user_uuid1
         },
         {
             "completed": True
@@ -67,14 +75,18 @@ def test_create_and_read_some_tasks():
         {
             'description': 'foo',
             'completed': False
+            "owner_uuid": user_uuid
         },
         {
             'description': 'bar',
             'completed': True
+            "owner_uuid": user_uuid1
+
         },
         {
             'description': 'baz',
             'completed': False
+            "owner_uuid": user_uuid1
         },
         {
             'description': 'no description',
