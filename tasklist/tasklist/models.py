@@ -20,7 +20,7 @@ class Task(BaseModel):
         title='Shows whether the task was completed',
     )
     owner_uuid: Optional[str] = Field(
-        "76d41d93-b887-49e1-a697-f13758dd097a",
+        None,
         title="Owner UUID",
         max_length=32,
     )
@@ -30,7 +30,7 @@ class Task(BaseModel):
             'example': {
                 'description': 'Buy baby diapers',
                 'completed': False,
-                "owner_uuid": owner_uuid_str
+                "owner_uuid": '1b57f7a1-22df-4cb4-b6b6-3356e1cd0be7'
             }
         }
 
@@ -41,7 +41,7 @@ class User(BaseModel):
         max_length=1024,
     )
     owner_uuid: Optional[str] = Field(
-        "",
+        None,
         title="Owner UUID",
         max_length=32,
     )
@@ -50,6 +50,6 @@ class User(BaseModel):
         schema_extra = {
             'example': {
                 'name': 'Jua1mmmmmmm',
-                "owner_uuid": owner_uuid_str
+                "owner_uuid": '1b57f7a1-22df-4cb4-b6b6-3356e1cd0be7'
             }
         }

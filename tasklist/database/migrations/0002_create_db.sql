@@ -1,8 +1,14 @@
+DROP TABLE IF EXISTS tasks;
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     owner_uuid BINARY(16) PRIMARY KEY,
-    name NVARCHAR(1024),
+    name NVARCHAR(1024)
 );
 
-ALTER TABLE tasks ADD owner_uuid BINARY(16);
-ALTER TABLE tasks ADD FOREIGN KEY (owner_uuid) REFERENCES users(owner_uuid);
+CREATE TABLE tasks (
+    uuid BINARY(16) PRIMARY KEY,
+    description NVARCHAR(1024),
+    owner_uuid BINARY(16),
+    completed BOOLEAN,
+    FOREIGN KEY (owner_uuid) REFERENCES users(owner_uuid) ON DELETE SET NULL
+);

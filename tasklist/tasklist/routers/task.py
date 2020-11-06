@@ -27,8 +27,8 @@ async def read_tasks(completed: bool = None, owner_uuid = uuid.UUID, db: DBSessi
     description='Creates a new task and returns its UUID.',
     response_model=uuid.UUID,
 )
-async def create_task(item: Task,owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
-    return db.create_task(item, owner_uuid)
+async def create_task(item: Task, db: DBSession = Depends(get_db)):
+    return db.create_task(item)
 
 
 @router.get(

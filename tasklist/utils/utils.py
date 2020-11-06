@@ -5,7 +5,6 @@ import os.path
 
 import mysql.connector as cnt
 
-
 def get_config_filename():
     return os.path.join(
         os.path.dirname(__file__),
