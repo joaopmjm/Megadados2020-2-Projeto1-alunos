@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get(
-    '',
+    '/user/{owner_uuid}',
     summary='Reads task list',
     description='Reads the whole task list.',
     response_model=Dict[uuid.UUID, Task],
@@ -32,7 +32,7 @@ async def create_task(item: Task, db: DBSession = Depends(get_db)):
 
 
 @router.get(
-    '/{owner_uuid}/{uuid_}',
+    '/{uuid_}/user/{owner_uuid}',
     summary='Reads task',
     description='Reads task from UUID.',
     response_model=Task,
@@ -48,7 +48,7 @@ async def read_task(uuid_: uuid.UUID, owner_uuid = uuid.UUID, db: DBSession = De
 
 
 @router.put(
-    '/{owner_uuid}/{uuid_}',
+    '/{uuid_}',
     summary='Replaces a task',
     description='Replaces a task identified by its UUID.',
 )
@@ -67,20 +67,21 @@ async def replace_task(
 
 
 @router.patch(
-    '/{uuid_}',
+    '/{uuid_}/user/{owner_uuid}',
     summary='Alters task',
     description='Alters a task identified by its UUID',
 )
 async def alter_task(
         uuid_: uuid.UUID,
+        owner_uuid: uuid.UUID,
         item: Task,
         db: DBSession = Depends(get_db),
 ):
     try:
-        old_item = db.read_task(uuid_)
+        old_item = db.read_task(uuid_, owner_uuid)
         update_data = item.dict(exclude_unset=True)
         new_item = old_item.copy(update=update_data)
-        db.replace_task(uuid_, new_item)
+        db.replace_task(uuid_, new_item, owner_uuid)
     except KeyError as exception:
         raise HTTPException(
             status_code=404,
@@ -89,13 +90,13 @@ async def alter_task(
 
 
 @router.delete(
-    '/{uuid_}',
+    '/{uuid_}/user/{owner_uuid}',
     summary='Deletes task',
     description='Deletes a task identified by its UUID',
 )
-async def remove_task(uuid_: uuid.UUID, db: DBSession = Depends(get_db)):
+async def remove_task(uuid_: uuid.UUID, owner_uuid: uuid.UUID, db: DBSession = Depends(get_db)):
     try:
-        db.remove_task(uuid_)
+        db.remove_task(uuid_, owner_uuid)
     except KeyError as exception:
         raise HTTPException(
             status_code=404,

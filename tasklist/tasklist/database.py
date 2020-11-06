@@ -17,7 +17,7 @@ class DBSession:
     def __init__(self, connection: conn.MySQLConnection):
         self.connection = connection
 
-    def read_tasks(self, completed: bool = None, owner_uuid: str = ""):
+    def read_tasks(self, completed: bool = None, owner_uuid: str = None):
         query = 'SELECT BIN_TO_UUID(uuid), description, completed FROM tasks'
         if completed is not None:
             query += ' WHERE completed = '
@@ -72,7 +72,7 @@ class DBSession:
 
         return Task(description=result[0], completed=bool(result[1]))
 
-    def replace_task(self, uuid_, item):
+    def replace_task(self, uuid_, item: Task, owner_uuid):
         if not self.__task_exists(uuid_):
             raise KeyError()
 
@@ -82,7 +82,7 @@ class DBSession:
                 UPDATE tasks SET description=%s, completed=%s
                 WHERE uuid=UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)
                 ''',
-                (item.description, item.completed, str(uuid_), item.owner_uuid),
+                (item.description, item.completed, str(uuid_), owner_uuid),
             )
         self.connection.commit()
 
