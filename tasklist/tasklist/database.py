@@ -139,11 +139,11 @@ class DBSession:
 
         return 200
 
-    def update_user(self, name: str, owner_uuid):
+    def update_user(self, item: User, owner_uuid):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 'UPDATE users SET name=%s WHERE owner_uuid=UUID_TO_BIN(%s)',
-                (name, owner_uuid),
+                (item.name, owner_uuid),
             )
         self.connection.commit()
 

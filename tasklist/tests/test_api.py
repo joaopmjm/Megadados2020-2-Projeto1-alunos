@@ -54,6 +54,19 @@ def test_create_and_delete_user():
     response = client.delete(f"/user/{user_uuid}")
     assert response.status_code == 200
 
+def test_alter_user():
+    setup_database()
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
+    new_user = {"name":"new-user-name1"}
+
+    response = client.patch(f'/user/{user_uuid}', json=new_user)
+
+    response = client.delete(f"/user/{user_uuid}")
+    assert response.status_code == 200
+
 def test_create_and_read_some_tasks():
     setup_database()
 

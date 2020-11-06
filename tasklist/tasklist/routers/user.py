@@ -43,11 +43,11 @@ async def delete_user(owner_uuid: uuid.UUID, db: DBSession = Depends(get_db)):
 )
 async def alter_user(
         owner_uuid: uuid.UUID,
-        name: str,
+        item: User,
         db: DBSession = Depends(get_db),
 ):
     try:
-        db.update_user(name=name, owner_uuid=owner_uuid)
+        db.update_user(item, owner_uuid=owner_uuid)
     except KeyError as exception:
         raise HTTPException(
             status_code=404,
