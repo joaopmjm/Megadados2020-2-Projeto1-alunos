@@ -39,7 +39,7 @@ async def create_task(item: Task,owner_uuid = uuid.UUID, db: DBSession = Depends
 )
 async def read_task(uuid_: uuid.UUID, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
     try:
-        return db.read_task(uuid_, , owner_uuid)
+        return db.read_task(uuid_, owner_uuid)
     except KeyError as exception:
         raise HTTPException(
             status_code=404,
@@ -110,62 +110,3 @@ async def remove_task(uuid_: uuid.UUID, db: DBSession = Depends(get_db)):
 )
 async def remove_all_tasks(db: DBSession = Depends(get_db)):
     db.remove_all_tasks()
-
-
-@router.post(
-    '',
-    summary='Creates a new user',
-    description='Creates a new user and returns its UUID.',
-    response_model=uuid.UUID,
-)
-async def create_user(item: User, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
-    return db.create_user(item, owner_uuid)
-
-
-@router.delete(
-    '/{owner_uuid}',
-    summary='Deletes user',
-    description='Deletes a user identified by its UUID',
-)
-async def delete_user(owner_uuid: uuid.UUID, db: DBSession = Depends(get_db)):
-    try:
-        db.delete_user(owner_uuid)
-    except KeyError as exception:
-        raise HTTPException(
-            status_code=404,
-            detail='User not found',
-        ) from exception
-
-
-@router.patch(
-    '/{owner_uuid}',
-    summary='Alters user name',
-    description='Alters a user`s name identified by its UUID',
-)
-async def alter_user(
-        owner_uuid: uuid.UUID,
-        name: str,
-        db: DBSession = Depends(get_db),
-):
-    try:
-        db.update_user(name=name, owner_uuid=owner_uuid)
-    except KeyError as exception:
-        raise HTTPException(
-            status_code=404,
-            detail='Task not found',
-        ) from exception
-
-@router.get(
-    '/{owner_uuid}',
-    summary='Reads user name',
-    description='Reads user name from UUID.',
-    response_model=User,
-)
-async def read_user(owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
-    try:
-        return db.read_user(owner_uuid)
-    except KeyError as exception:
-        raise HTTPException(
-            status_code=404,
-            detail='User not found',
-        ) from exception
