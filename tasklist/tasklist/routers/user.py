@@ -17,8 +17,8 @@ router = APIRouter()
     description='Creates a new user and returns its UUID.',
     response_model=uuid.UUID,
 )
-async def create_user(item: User, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
-    return db.create_user(item, owner_uuid)
+async def create_user(item: User, db: DBSession = Depends(get_db)):
+    return db.create_user(item)
 
 
 @router.delete(

@@ -45,11 +45,21 @@ def test_read_tasks_with_no_task():
     assert response.status_code == 200
     assert response.json() == {}
 
+def test_create_and_delete_user():
+    setup_database()
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
+    response = client.delete(f"/user/{user_uuid}")
+    assert response.status_code == 200
 
 def test_create_and_read_some_tasks():
     setup_database()
-    user_uuid = str(uuid4())
-    user_uuid1 = str(uuid4())
+
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
 
     tasks = [
         {
@@ -60,11 +70,11 @@ def test_create_and_read_some_tasks():
         {
             "description": "bar",
             "completed": True,
-            "owner_uuid": user_uuid1
+            "owner_uuid": user_uuid
         },
         {
             "description": "baz",
-            "owner_uuid": user_uuid1
+            "owner_uuid": user_uuid
         },
         {
             "completed": True
@@ -80,13 +90,13 @@ def test_create_and_read_some_tasks():
         {
             'description': 'bar',
             'completed': True,
-            "owner_uuid": user_uuid1
+            "owner_uuid": user_uuid
 
         },
         {
             'description': 'baz',
             'completed': False,
-            "owner_uuid": user_uuid1
+            "owner_uuid": user_uuid
         },
         {
             'description': 'no description',
@@ -121,13 +131,13 @@ def test_create_and_read_some_tasks():
 
     # Read only completed tasks.
     for completed in [False, True]:
-        response = client.get(f'/task?completed={str(completed)}')
+        response = client.get(f'/task/user/{user_uuid}?completed={str(completed)}')
         assert response.status_code == 200
         assert response.json() == get_expected_responses_with_uuid(completed)
 
     # Delete all tasks.
     for uuid_ in uuids:
-        response = client.delete(f'/task/{uuid_}')
+        response = client.delete(f'/task/{uuid_}/user.{user_uuid}')
         assert response.status_code == 200
 
     # Check whether there are no more tasks.
@@ -135,81 +145,120 @@ def test_create_and_read_some_tasks():
     assert response.status_code == 200
     assert response.json() == {}
 
+    client.delete(f"/user/{user_uuid}")
+
 
 def test_substitute_task():
     setup_database()
 
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
     # Create a task.
-    task = {'description': 'foo', 'completed': False}
+    task = {'description': 'foo', 'completed': False, "owner_uuid": user_uuid}
     response = client.post('/task', json=task)
     assert response.status_code == 200
     uuid_ = response.json()
 
     # Replace the task.
     new_task = {'description': 'bar', 'completed': True}
-    response = client.put(f'/task/{uuid_}', json=new_task)
+    response = client.put(f'/task/{uuid_}/user/{user_uuid}', json=new_task)
     assert response.status_code == 200
 
     # Check whether the task was replaced.
-    response = client.get(f'/task/{uuid_}')
+    response = client.get(f'/task/{uuid_}/user/{user_uuid}')
     assert response.status_code == 200
     assert response.json() == new_task
 
     # Delete the task.
-    response = client.delete(f'/task/{uuid_}')
+    response = client.delete(f'/task/{uuid_}/user/{user_uuid}')
     assert response.status_code == 200
+
+    client.delete(f"/user/{user_uuid}")
 
 
 def test_alter_task():
     setup_database()
 
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
     # Create a task.
-    task = {'description': 'foo', 'completed': False}
+    task = {'description': 'foo', 'completed': False, "owner_uuid": user_uuid}
     response = client.post('/task', json=task)
     assert response.status_code == 200
     uuid_ = response.json()
 
     # Replace the task.
     new_task_partial = {'completed': True}
-    response = client.patch(f'/task/{uuid_}', json=new_task_partial)
+    response = client.patch(f'/task/{uuid_}/user/{user_uuid}', json=new_task_partial)
     assert response.status_code == 200
 
     # Check whether the task was altered.
-    response = client.get(f'/task/{uuid_}')
+    response = client.get(f'/task/{uuid_}/user/{user_uuid}')
     assert response.status_code == 200
     assert response.json() == {**task, **new_task_partial}
 
     # Delete the task.
-    response = client.delete(f'/task/{uuid_}')
+    response = client.delete(f'/task/{uuid_}/user/{user_uuid}')
     assert response.status_code == 200
+
+    client.delete(f"/user/{user_uuid}")
+
 
 
 def test_read_invalid_task():
     setup_database()
 
-    response = client.get('/task/invalid_uuid')
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
+    response = client.get(f'/task/invalid_uuid/user/{user_uuid}')
     assert response.status_code == 422
+
+    client.delete(f"/user/{user_uuid}")
 
 
 def test_read_nonexistant_task():
     setup_database()
 
-    response = client.get('/task/3668e9c9-df18-4ce2-9bb2-82f907cf110c')
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
+    response = client.get(f'/task/3668e9c9-df18-4ce2-9bb2-82f907cf110c/user/{user_uuid}')
     assert response.status_code == 404
+
+    client.delete(f"/user/{user_uuid}")
 
 
 def test_delete_invalid_task():
     setup_database()
 
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
     response = client.delete('/task/invalid_uuid')
     assert response.status_code == 422
+
+    client.delete(f"/user/{user_uuid}")
 
 
 def test_delete_nonexistant_task():
     setup_database()
 
+    user = {"name":"user-name1"}
+    response = client.get('/user', json=user)
+    user_uuid =  response.json()
+
     response = client.delete('/task/3668e9c9-df18-4ce2-9bb2-82f907cf110c')
     assert response.status_code == 404
+
+    client.delete(f"/user/{user_uuid}")
 
 
 def test_delete_all_tasks():

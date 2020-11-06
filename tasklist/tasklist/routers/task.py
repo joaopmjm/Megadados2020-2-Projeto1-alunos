@@ -48,13 +48,14 @@ async def read_task(uuid_: uuid.UUID, owner_uuid = uuid.UUID, db: DBSession = De
 
 
 @router.put(
-    '/{uuid_}',
+    '/{uuid_}/user/{owner_uuid}',
     summary='Replaces a task',
     description='Replaces a task identified by its UUID.',
 )
 async def replace_task(
         uuid_: uuid.UUID,
         item: Task,
+        owner_uuid: uuid.UUID,
         db: DBSession = Depends(get_db),
 ):
     try:
