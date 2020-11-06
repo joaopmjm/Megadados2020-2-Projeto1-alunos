@@ -59,11 +59,11 @@ def test_create_and_read_some_tasks():
         },
         {
             "description": "bar",
-            "completed": True
+            "completed": True,
             "owner_uuid": user_uuid1
         },
         {
-            "description": "baz"
+            "description": "baz",
             "owner_uuid": user_uuid1
         },
         {
@@ -74,27 +74,29 @@ def test_create_and_read_some_tasks():
     expected_responses = [
         {
             'description': 'foo',
-            'completed': False
+            'completed': False,
             "owner_uuid": user_uuid
         },
         {
             'description': 'bar',
-            'completed': True
+            'completed': True,
             "owner_uuid": user_uuid1
 
         },
         {
             'description': 'baz',
-            'completed': False
+            'completed': False,
             "owner_uuid": user_uuid1
         },
         {
             'description': 'no description',
-            'completed': True
+            'completed': True,
+            'owner_uuid': '76d41d93-b887-49e1-a697-f13758dd097a' # UUID fake
         },
         {
             'description': 'no description',
-            'completed': False
+            'completed': False,
+            'owner_uuid': '76d41d93-b887-49e1-a697-f13758dd097a'
         },
     ]
 
