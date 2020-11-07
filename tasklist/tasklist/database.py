@@ -16,9 +16,22 @@ from .models import Task, User
 class DBSession:
     def __init__(self, connection: conn.MySQLConnection):
         self.connection = connection
+    def read_all_tasks(self):
+        query = 'SELECT BIN_TO_UUID(uuid), descricao, completed FROM tasks'
 
+        with self.connection.cursor() as cursor:
+            cursor.execute(query)
+            db_results = cursor.fetchall()
+
+        return {
+            uuid :Task(
+                description=field_description,
+                completed=bool(field_completed),
+            )
+            for uuid, field_description, field_completed in db_results
+        }
     def read_tasks(self, completed: bool = None, owner_uuid: str = None):
-        query = 'SELECT BIN_TO_UUID(uuid), description, completed FROM tasks'
+        query = 'SELECT BIN_TO_UUID(uuid), descricao, completed FROM tasks'
         if completed is not None:
             query += ' WHERE completed = '
             if completed:
@@ -32,12 +45,12 @@ class DBSession:
             query += " WHERE owner_uuid = UUID_TO_BIN(%s)"
 
         with self.connection.cursor() as cursor:
-            cursor.execute(query, owner_uuid)
+            cursor.execute(query, str(owner_uuid))
             db_results = cursor.fetchall()
 
         return {
             uuid_: Task(
-                description=field_description,
+                descricao=field_description,
                 completed=bool(field_completed),
             )
             for uuid_, field_description, field_completed in db_results
@@ -48,11 +61,10 @@ class DBSession:
 
         with self.connection.cursor() as cursor:
             cursor.execute(
-                'INSERT INTO tasks VALUES (UUID_TO_BIN(%s), %s, %s, %s)',
-                (str(uuid_), item.description, item.completed, item.owner_uuid),
+                'INSERT INTO tasks (uuid, descricao, completed, owner_uuid) VALUES (UUID_TO_BIN(%s), %s, %s, %s)',
+                (str(uuid_), item.description, str(item.completed), str(item.owner_uuid)),
             )
         self.connection.commit()
-
         return uuid_
 
     def read_task(self, uuid_: uuid.UUID, owner_uuid):
@@ -62,15 +74,15 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 '''
-                SELECT description, completed
+                SELECT descricao, completed
                 FROM tasks
                 WHERE uuid = UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)
                 ''',
-                (str(uuid_), owner_uuid),
+                (str(uuid_), str(owner_uuid)),
             )
             result = cursor.fetchone()
 
-        return Task(description=result[0], completed=bool(result[1]))
+        return Task(descricao=result[0], completed=bool(result[1]))
 
     def replace_task(self, uuid_, item: Task, owner_uuid):
         if not self.__task_exists(uuid_):
@@ -79,10 +91,10 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 '''
-                UPDATE tasks SET description=%s, completed=%s
+                UPDATE tasks SET descricao=%s, completed=%s
                 WHERE uuid=UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)
                 ''',
-                (item.description, item.completed, str(uuid_), owner_uuid),
+                (item.description, item.completed, str(uuid_), str(owner_uuid)),
             )
         self.connection.commit()
 
@@ -93,7 +105,7 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 'DELETE FROM tasks WHERE uuid=UUID_TO_BIN(%s) AND owner_uuid=UUID_TO_BIN(%s)',
-                (str(uuid_), owner_uuid),
+                (str(uuid_), str(owner_uuid)),
             )
         self.connection.commit()
 
@@ -133,7 +145,7 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 'DELETE FROM users WHERE owner_uuid=UUID_TO_BIN(%s)',
-                (owner_uuid),
+                (str(owner_uuid)),
             )
         self.connection.commit()
 
@@ -143,7 +155,7 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 'UPDATE users SET name=%s WHERE owner_uuid=UUID_TO_BIN(%s)',
-                (name, owner_uuid),
+                (name, str(owner_uuid)),
             )
         self.connection.commit()
 
@@ -153,7 +165,7 @@ class DBSession:
         with self.connection.cursor() as cursor:
             cursor.execute(
                 'SELECT name FROM users WHERE owner_uuid=UUID_TO_BIN(%s)',
-                (owner_uuid),
+                (str(owner_uuid)),
             )
         self.connection.commit()
         result = cursor.fetchone()

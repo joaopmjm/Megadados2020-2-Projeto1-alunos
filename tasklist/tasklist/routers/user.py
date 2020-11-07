@@ -10,7 +10,6 @@ from ..models import User
 
 router = APIRouter()
 
-
 @router.post(
     '',
     summary='Creates a new user',
@@ -22,7 +21,7 @@ async def create_user(item: User, owner_uuid = uuid.UUID, db: DBSession = Depend
 
 
 @router.delete(
-    '/{owner_uuid}',
+    '/{owner_uuid}/delete',
     summary='Deletes user',
     description='Deletes a user identified by its UUID',
 )
@@ -37,7 +36,7 @@ async def delete_user(owner_uuid: uuid.UUID, db: DBSession = Depends(get_db)):
 
 
 @router.patch(
-    '/{owner_uuid}',
+    '/{owner_uuid}/modify',
     summary='Alters user name',
     description='Alters a user`s name identified by its UUID',
 )

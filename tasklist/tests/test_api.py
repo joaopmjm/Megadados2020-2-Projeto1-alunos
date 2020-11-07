@@ -55,16 +55,16 @@ def test_create_and_read_some_tasks():
         {
             "description": "foo",
             "completed": False,
-            "owner_uuid": user_uuid
+            "owner_uuid": str(user_uuid)
         },
         {
             "description": "bar",
             "completed": True,
-            "owner_uuid": user_uuid1
+            "owner_uuid": str(user_uuid1)
         },
         {
             "description": "baz",
-            "owner_uuid": user_uuid1
+            "owner_uuid": str(user_uuid1)
         },
         {
             "completed": True
@@ -75,18 +75,18 @@ def test_create_and_read_some_tasks():
         {
             'description': 'foo',
             'completed': False,
-            "owner_uuid": user_uuid
+            "owner_uuid": str(user_uuid)
         },
         {
             'description': 'bar',
             'completed': True,
-            "owner_uuid": user_uuid1
+            "owner_uuid": str(user_uuid1)
 
         },
         {
             'description': 'baz',
             'completed': False,
-            "owner_uuid": user_uuid1
+            "owner_uuid": str(user_uuid1)
         },
         {
             'description': 'no description',

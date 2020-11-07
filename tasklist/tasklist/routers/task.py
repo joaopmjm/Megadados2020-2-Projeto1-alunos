@@ -10,6 +10,15 @@ from ..models import Task
 
 router = APIRouter()
 
+@router.get(
+    '',
+    summary='read all tasks',
+    description='Read all tasks.',
+    response_model=Dict[uuid.UUID, Task],
+)
+async def read_all_tasks(db: DBSession = Depends(get_db)):
+    return db.read_all_tasks()
+
 
 @router.get(
     '/user/{owner_uuid}',
@@ -105,7 +114,7 @@ async def remove_task(uuid_: uuid.UUID, owner_uuid: uuid.UUID, db: DBSession = D
 
 
 @router.delete(
-    '',
+    '/delete/all',
     summary='Deletes all tasks, use with caution',
     description='Deletes all tasks, use with caution',
 )
