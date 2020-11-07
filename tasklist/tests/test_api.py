@@ -83,19 +83,11 @@ def test_create_and_read_some_tasks():
         {
             "description": "bar",
             "completed": True,
-<<<<<<< HEAD
             "owner_uuid": str(user_uuid1)
         },
         {
             "description": "baz",
             "owner_uuid": str(user_uuid1)
-=======
-            "owner_uuid": user_uuid
-        },
-        {
-            "description": "baz",
-            "owner_uuid": user_uuid
->>>>>>> 9e21cf6a91b9f3a537167fec06f9093cf8be7407
         },
         {
             "completed": True
@@ -111,21 +103,12 @@ def test_create_and_read_some_tasks():
         {
             'description': 'bar',
             'completed': True,
-<<<<<<< HEAD
             "owner_uuid": str(user_uuid1)
-=======
-            "owner_uuid": user_uuid
->>>>>>> 9e21cf6a91b9f3a537167fec06f9093cf8be7407
-
         },
         {
             'description': 'baz',
             'completed': False,
-<<<<<<< HEAD
             "owner_uuid": str(user_uuid1)
-=======
-            "owner_uuid": user_uuid
->>>>>>> 9e21cf6a91b9f3a537167fec06f9093cf8be7407
         },
         {
             'description': 'no description',
