@@ -16,8 +16,8 @@ router = APIRouter()
     description='Creates a new user and returns its UUID.',
     response_model=uuid.UUID,
 )
-async def create_user(item: User, owner_uuid = uuid.UUID, db: DBSession = Depends(get_db)):
-    return db.create_user(item, owner_uuid)
+async def create_user(item: User, db: DBSession = Depends(get_db)):
+    return db.create_user(item)
 
 
 @router.delete(
@@ -42,11 +42,11 @@ async def delete_user(owner_uuid: uuid.UUID, db: DBSession = Depends(get_db)):
 )
 async def alter_user(
         owner_uuid: uuid.UUID,
-        name: str,
+        item: User,
         db: DBSession = Depends(get_db),
 ):
     try:
-        db.update_user(name=name, owner_uuid=owner_uuid)
+        db.update_user(item, owner_uuid=owner_uuid)
     except KeyError as exception:
         raise HTTPException(
             status_code=404,
